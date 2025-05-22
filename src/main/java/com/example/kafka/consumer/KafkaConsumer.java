@@ -1,4 +1,4 @@
-package com.example.kafka.Consumer;
+package com.example.kafka.consumer;
 
 import org.apache.camel.AggregationStrategy;
 import org.apache.camel.Exchange;
@@ -8,32 +8,42 @@ import org.springframework.stereotype.Component;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * KafkaConsumer class to consume messages from Kafka, aggregate them, and write to files.
+ */
 @Component
 public class KafkaConsumer extends RouteBuilder {
 
     @Value("${aggregation.size}") // Configurable aggregation size
     private int aggregationSize;
-    @Value("${aggregation.timeout}") // Configurable aggregation size
+
+    @Value("${aggregation.timeout}") // Configurable aggregation timeout
     private int aggregationTimeout;
+
+    @Value("${output.directory}") // Configurable output directory
+    private String outputDirectory;
 
     private final AtomicInteger fileCounter = new AtomicInteger(0); // Counter for file names
 
     @Override
     public void configure() throws Exception {
         from("kafka:Uniper_Topic?brokers=localhost:9092")
+                .log("Consumed message: ${body}")
                 .aggregate(header("id"), new GroupedMessageAggregationStrategy())
                 .completionSize(aggregationSize) // Aggregate based on the configured size
-                .completionTimeout(aggregationTimeout) // Optional: Timeout to avoid indefinite waiting
+                .completionTimeout(aggregationTimeout) // Timeout to avoid indefinite waiting
                 .log("Aggregated messages: ${body}")
                 .process(exchange -> {
                     // Add the counter value to the file name
                     int currentCount = fileCounter.incrementAndGet();
                     exchange.getIn().setHeader("fileCounter", currentCount);
                 })
-                .to("file:C:/Users/risha/Downloads/AggregatedFiles?fileName=aggregated-messages-${header.id}-${header.fileCounter}.txt");
+                .to("file:" + outputDirectory + "?fileName=aggregated-messages-${header.id}-${header.fileCounter}.txt");
     }
 
-    // Custom Aggregation Strategy
+    /**
+     * Custom Aggregation Strategy to group messages.
+     */
     private static class GroupedMessageAggregationStrategy implements AggregationStrategy {
         @Override
         public Exchange aggregate(Exchange oldExchange, Exchange newExchange) {

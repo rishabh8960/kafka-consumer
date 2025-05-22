@@ -1,24 +1,24 @@
 server:
   port: 8081
+
 spring:
   kafka:
     bootstrap-servers: localhost:9092
-    Key-serializer: org.apache.kafka.common.serialization.StringSerializer
+    key-serializer: org.apache.kafka.common.serialization.StringSerializer
     value-serializer: org.apache.kafka.common.serialization.StringSerializer
-#    consumer:
-#      group-id: my-group
-#      auto-offset-reset: earliest
-#      enable-auto-commit: false
 
 camel:
   components:
     kafka:
-      brokers:
-       - localhost:9092
+      brokers: localhost:9092
       consumer:
         group-id: demo-2
   springboot:
     main-run-controller: true
+
 aggregation:
   size: 10 # Configurable aggregation size
   timeout: 10000 # Configurable aggregation timeout in milliseconds
+
+output:
+  directory: C:/Users/risha/Downloads/AggregatedFiles # Configurable output directory

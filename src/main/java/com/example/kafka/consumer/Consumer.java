@@ -1,7 +1,4 @@
-package com.example.kafka.Consumer;
-
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.stereotype.Service;
+package com.example.kafka.consumer;
 
 //@Service
 //public class Consumer {
